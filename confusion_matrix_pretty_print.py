@@ -25,6 +25,9 @@ def get_new_fig(fn, figsize=[9,9]):
     """ Init graphics """
     fig1 = plt.figure(fn, figsize)
     ax1 = fig1.gca()   #Get Current Axis
+    #ax1 = fig1.add_subplot(1,2,1)
+    #ax2 = fig1.add_subplot(1, 2, 2)
+    #ax2.axis('off')
     ax1.cla() # clear existing plot
     return fig1, ax1
 #
@@ -125,7 +128,7 @@ def insert_totals(df_cm):
 #
 
 def pretty_plot_confusion_matrix(df_cm, annot=True, cmap="Oranges", fmt='.2f', fz=11,
-      lw=0.5, cbar=False, figsize=[8,8], show_null_values=0, pred_val_axis='y'):
+      lw=0.5, cbar=False, figsize=[8,8], show_null_values=0, pred_val_axis='y', report=None):
     """
       print conf matrix with default layout (like matlab)
       params:
@@ -137,6 +140,7 @@ def pretty_plot_confusion_matrix(df_cm, annot=True, cmap="Oranges", fmt='.2f', f
         pred_val_axis  where to show the prediction values (x or y axis)
                         'col' or 'x': show predicted values in columns (x axis) instead lines
                         'lin' or 'y': show predicted values in lines   (y axis)
+        report          a string to print, ie classification_report output
     """
     if(pred_val_axis in ('col', 'x')):
         xlbl = 'Predicted'
@@ -148,7 +152,8 @@ def pretty_plot_confusion_matrix(df_cm, annot=True, cmap="Oranges", fmt='.2f', f
 
     # create "Total" column
     insert_totals(df_cm)
-
+    if report:
+        figsize=[16,8]
     #this is for print allways in the same window
     fig, ax1 = get_new_fig('Conf matrix default', figsize)
 
@@ -199,8 +204,16 @@ def pretty_plot_confusion_matrix(df_cm, annot=True, cmap="Oranges", fmt='.2f', f
     ax.set_title('Confusion matrix')
     ax.set_xlabel(xlbl)
     ax.set_ylabel(ylbl)
-    plt.tight_layout()  #set layout slim
+    if report:
+        print(f'adding report: {report}')
+        plt.text(5,2,report,fontsize=12,wrap=True)
+        plt.subplots_adjust(right=0.5)
+    #plt.tight_layout()  #set layout slim
+
+
+
     plt.show()
+    return fig
 #
 
 def plot_confusion_matrix_from_data(y_test, predictions, columns=None, annot=True, cmap="Oranges",
@@ -209,7 +222,7 @@ def plot_confusion_matrix_from_data(y_test, predictions, columns=None, annot=Tru
         plot confusion matrix function with y_test (actual values) and predictions (predic),
         whitout a confusion matrix yet
     """
-    from sklearn.metrics import confusion_matrix
+    from sklearn.metrics import confusion_matrix,classification_report
     from pandas import DataFrame
 
     #data
@@ -226,7 +239,10 @@ def plot_confusion_matrix_from_data(y_test, predictions, columns=None, annot=Tru
     figsize=[9,9];
     show_null_values = 2
     df_cm = DataFrame(confm, index=columns, columns=columns)
-    pretty_plot_confusion_matrix(df_cm, fz=fz, cmap=cmap, figsize=figsize, show_null_values=show_null_values, pred_val_axis=pred_val_axis)
+
+    report = classification_report(y_test, predictions, target_names=columns)
+    return pretty_plot_confusion_matrix(df_cm, fz=fz, cmap=cmap, figsize=figsize, show_null_values=show_null_values,
+                                        pred_val_axis=pred_val_axis, report=report)
 #
 
 
@@ -285,6 +301,7 @@ if(__name__ == '__main__'):
     print('__main__')
     print('_test_cm: test function with confusion matrix done\nand pause')
     _test_cm()
+    plt.show()
     plt.pause(5)
     print('_test_data_class: test function with y_test (actual values) and predictions (predic)')
     _test_data_class()
