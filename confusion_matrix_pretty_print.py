@@ -211,7 +211,6 @@ def pretty_plot_confusion_matrix(df_cm, annot=True, cmap="Oranges", fmt='.2f', f
     #plt.tight_layout()  #set layout slim
 
 
-
     plt.show()
     return fig
 #
