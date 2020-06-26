@@ -210,7 +210,8 @@ def pretty_plot_confusion_matrix(df_cm, annot=True, cmap="Oranges", fmt='.2f', f
         plt.subplots_adjust(right=0.5)
     #plt.tight_layout()  #set layout slim
 
-
+    plt.draw()
+    plt.pause(0.1)
     plt.show()
     return fig
 #
